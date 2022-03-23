@@ -1,0 +1,24 @@
+'可用于自动依次打开文件夹中的Excel文件并对其编辑
+Sub Open_AllFiles()
+Dim str As String
+Dim wb As Workbook
+Dim pathname_01 As String
+
+pathname_01 = InputBox("Input the pathname you want to open", "Attention")     '通过“自行输入”的方式来自定义需要遍历的文件路径
+
+str = Dir(pathname_01 & "\*.xls*")    'Dir 返回与pathname 匹配的第一个文件名
+For i = 1 To 100
+    Set wb = Workbooks.Open(pathname_01 & "\" & str)    '给wb赋予 打开的文件 这个对象值
+    '编写有关对 wb 的相关程序操作：将内容复制出来等操作
+    
+    wb.Sheets(1).Range("a1") = "close"
+    wb.Save                 '表格中做了修改后，要先保存再关闭
+    wb.Close
+    str = Dir               '继续遍历，Dir 会不断遍历文件夹中的文件 直到不满足条件为止
+
+    If str = "" Then    '当Dir将符合条件的遍历全遍历完后，将出现空值，此时需推出循环，否则会报错
+        Exit For
+    End If
+    
+Next
+End Sub
