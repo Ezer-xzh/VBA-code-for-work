@@ -1,0 +1,31 @@
+Sub Auto_filling()
+
+Dim i As Integer
+Dim j As Integer
+
+For j = 1 To Sheets.Count
+'sheets.count 用来计算表格里sheet的数量
+    For i = 100 To 2 Step -1
+    '倒过来写是因为，后续有删除的代码，每次删除会自动变化选择的行，导致有的行不执行代码内容
+    'step 步长不能忘
+    
+        If Sheets(j).Range("e" & i) = "男" Then    '根据性别来判断称呼
+            Sheets(j).Range("f" & i) = "先生"
+        Else
+            Sheets(j).Range("f" & i) = "女士"
+        End If
+        
+        If Sheets(j).Range("b" & i) = "理工" Then    '根据专业来填充代码
+            Sheets(j).Range("c" & i) = "LG"
+        ElseIf Sheets(j).Range("b" & i) = "文科" Then    'endif 记住是连写
+            Sheets(j).Range("c" & i) = "WK"
+        Else
+            Sheets(j).Range("c" & i) = "CJ"
+        End If
+        
+        If Sheets(j).Range("d" & i) = "" Then        '删除多余的空白列
+            Sheets(j).Range("d" & i).EntireRow.Delete
+        End If
+    Next
+Next
+End Sub
