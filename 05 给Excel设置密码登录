@@ -1,0 +1,55 @@
+'通过事件与代码结合，实现对工作簿的密码保护；
+'Beforeclose 运行Hidden，将本应操作的文件隐藏不可见，同时设置二重保护"保护工作簿"
+'Open 运行Code，弹出密码验证界面，若密码正确，则解除”保护工作簿“功能，同时取消其它表格的隐藏；
+'结合 VBA project属性的保护功能，可以从三个方面将excel保护起来；
+
+Sub Hidden()
+Dim sht As Worksheet
+
+ActiveWorkbook.Unprotect Password:="1234"  '解除对工作簿的保护
+
+For Each sht In Sheets
+
+    If sht.Name = "登录界面" Then    '自动隐藏密码保护的表格
+        sht.Visible = True
+    Else
+        sht.Visible = False
+    End If
+Next
+'关闭表格时激活工作簿保护功能，并设置一个密码
+ActiveWorkbook.Protect Password:="1234", Structure:=True, Windows:=False
+
+End Sub
+
+'
+'
+'
+
+Sub Code()
+Dim sht As Worksheet
+Dim i
+
+i = InputBox("输入密码", "密码验证")  '交互界面，输入密码提示
+
+If i = "123" Then                      '密码设置，判断
+    ActiveWorkbook.Unprotect Password:="1234"  '解除对工作簿的保护
+    
+    Call Show
+Else
+    MsgBox ("密码错误，请关闭文件再次打开文件")
+End If
+
+End Sub
+
+'
+'
+'
+
+Sub Show()
+Dim sht As Worksheet
+
+For Each sht In Sheets
+    sht.Visible = True
+Next
+
+End Sub
