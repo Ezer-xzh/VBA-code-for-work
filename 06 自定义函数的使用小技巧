@@ -1,0 +1,20 @@
+' 对于一个表格里较为复杂的计算公式，利用自定义函数功能来编辑，降低单元格写函数的难度
+' 编写函数
+Function 函数名(变量1，变量2，...)
+
+函数名 =  变量的运算公式
+
+End Function
+
+'利用宏给函数加描述，便于后续使用时查看内容
+Sub Call_function()
+
+Application.MacroOptions Macro:="函数名", Description:="测试用" & Chr(10) & "haha: sas" & Chr(10) & "heihei:aaa"
+
+End Sub
+
+'由于给函数加描述，需要运行宏，所以结合workbook的事件，在文件打开时 运行该 宏
+Private Sub Workbook_Open()
+Call Call_function
+
+End Sub
