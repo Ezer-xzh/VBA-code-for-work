@@ -1,0 +1,20 @@
+'一个表格的工作簿拆分和另存
+Sub Sheets_SaveAs()
+
+Dim sht As Worksheet
+Dim i As Integer
+Dim str As String
+
+'str = "C:\Users\xuzhaohua\Desktop\testdata"
+str = InputBox("Input the pathname you want to save", "Attention") '通过“自行输入”的方式来自定义文件保存路径
+
+For Each sht In Sheets
+
+    sht.Select '对于For each 函数，要求每次选中sht，否则会无法识别，同时养成好习惯
+    sht.Copy
+    
+    ActiveWorkbook.SaveAs Filename:=str & "\" & sht.Name & ".xlsx"       '路径+文件名+文件格式 形成最终的保存结果
+    ActiveWorkbook.Close
+	
+Next
+End Sub
