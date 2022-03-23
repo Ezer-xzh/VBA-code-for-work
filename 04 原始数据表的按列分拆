@@ -1,0 +1,52 @@
+Sub Filter_divide()
+
+Dim i, irow, k, l As Integer
+Dim sht As Worksheet
+Dim j As Integer
+Dim str As String
+
+Str = InputBox("输入你要处理筛选并保留的表格名")	'选取保留的表格
+j = InputBox("输入第几列")						'对于交互输入的筛选列，必须单独定义，否则无法识别
+irow = Sheet1.Range("a6553").End(xlUp).Row		'找到表格最底下的行数
+
+Application.DisplayAlerts = False				'关闭窗口提示功能，例如 是否确认删除 之类
+
+'检查并删除多余表格，只保留原“数据”表格（通常一个工作簿可能会有其它杂表，去掉不需要的表）
+If Sheets.Count > 1 Then
+
+    For Each sht In Sheets
+        If sht.Name <> str Then
+            sht.Delete
+        End If
+    Next
+End If
+
+Application.DisplayAlerts = True				'打开窗口提示功能
+
+'按筛选需要生成工作簿
+For i = 2 To irow
+    k = 0
+    For Each sht In Sheets
+    
+        If sht.Name = Sheet1.Cells(i, j) Then
+            k = k + 1
+        End If
+    Next
+    
+    If k = 0 Then
+        Sheets.Add after:=Sheets(Sheets.Count)
+        Sheets(Sheets.Count).Name = Sheet1.Cells(i, j) 
+    End If     
+Next
+
+'按其它工作簿的名字对"数据表格"进行筛选和并复制数据到目的表格
+For l = 2 To Sheets.Count
+    Sheet1.Range("a1:f" & irow).AutoFilter Field:=j, Criteria1:=Sheets(l).Name     '按列筛选
+    Sheet1.Range("a1:f" & irow).Copy Sheets(l).Range("a1")
+Next
+
+Sheet1.Range("a1:f" & irow).AutoFilter
+Sheet1.Select
+
+
+End Sub
