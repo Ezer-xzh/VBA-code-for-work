@@ -1,0 +1,177 @@
+Sub sheetcopy()
+    Sheet1.Copy after:=Sheet1
+    ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count).Name = "updated_data" ''复制一份原始数据进行处理
+    
+    ''删除不需要的列
+    Sheets("updated_data").Activate
+    Range("B:D, I:L, W:W, AC:AI,AK:BI").Select
+    Selection.Delete Shift:=xlToLeft
+    
+    ''新增一列
+    Range("A:A").Select
+    Selection.Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    
+    ''新增一序号列，替代时间列用于绘图
+    Dim irow As Integer
+    
+    irow = Sheets("updated_data").Range("B6000").End(xlUp).Row
+    Range("A2").Select
+    ActiveCell.FormulaR1C1 = "1"
+    Range("A3").Select
+    ActiveCell.FormulaR1C1 = "2"
+    Range("A2:A3").Select
+    Selection.AutoFill Destination:=Range("A2:A" & irow)
+    
+    ''中文抬头改变英文抬头
+    Range("A1") = "No."                         ''序号
+    Range("B1") = "Date Time"                   ''测试时间
+    Range("C1") = "E_Humidity"                  ''环境湿度
+    Range("D1") = "E_Temperature(℃)"           ''环境温度
+    Range("E1") = "E_Pressure(mbar)"            ''大气压
+    Range("F1") = "C_Outlet FAD(l/s)"           ''空压机排气FAD
+    Range("G1") = "C_Outlet T(℃)"              ''空压机排气温度
+    Range("H1") = "C_Outlet P(bar)"             ''空压机排气压力
+    Range("I1") = "N_Inlet P(bar)"              ''制氮机进气压力
+    Range("J1") = "N_Outlet P(bar)"             ''制氮机排气压力
+    Range("K1") = "Buffer_Outlet P(bar)"        ''制氮机储罐后压力
+    Range("L1") = "N_Inlet DP(℃)"              ''制氮机进气露点
+    Range("M1") = "N_Outlet DP(℃)"             ''制氮机排气露点
+    Range("N1") = "N_Outlet N2_Purity"          ''制氮机出口氮气纯度
+    Range("O1") = "B_Outlet N2_Purity"          ''制氮机储罐后压力氮气纯度
+    Range("P1") = "N_Outlet N2_MF(kg/s)"        ''制氮机出口氮气质量流量
+    Range("Q1") = "N_Tower_B P(bar)"            ''制氮机B塔压力
+    Range("R1") = "N_Tower_A P(bar)"            ''制氮机A塔压力
+    Range("S1") = "N_Outlet T(℃)"              ''制氮机排气温度
+    Range("T1") = "N_Inlet T(℃)"               ''制氮机进气温度
+    Range("U1") = "N_Inlet FAD(l/s)"            ''制氮机进气FAD
+    Range("V1") = "N_Outlet N2_VF(Nl/s)"        ''氮气体积流量 Nl/s
+   
+    ''格式调整，数据居中和数字位数调整
+    Range("A1:V" & irow).Select
+    Selection.HorizontalAlignment = xlCenter
+    Selection.VerticalAlignment = xlCenter
+   
+    Range("C:O, Q:V").Select
+    Selection.NumberFormatLocal = "0.00_ "
+    
+    Columns("P").Select
+    Selection.NumberFormatLocal = "0.0000_ "
+    
+    Cells.Select
+    Cells.EntireColumn.AutoFit
+    Range("A1").Select
+End Sub
+
+Sub Data_analysis()
+    Sheet2.Copy after:=Sheet2
+    ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count).Name = "data_analysis"       ''复制一份原始数据进行分析处理
+    
+    Sheets("data_analysis").Activate
+    Cells.Replace What:="#NV", Replacement:=""
+    
+    Dim n As Integer
+    
+    n = Sheets("data_analysis").Range("A6000").End(xlUp).Row
+    
+    ''制氮机进气压力和排气压力绘图
+    ActiveSheet.Shapes.AddChart2(227, xlLine).Select
+    ActiveChart.SetSourceData Source:=Range("I1:I" & n & ",K1:K" & n)
+    ActiveChart.Axes(xlValue).Select
+    ActiveChart.Axes(xlValue).MinimumScale = 5                                   ''纵坐标赋予最小值
+    ActiveChart.FullSeriesCollection(1).Select
+    ActiveChart.FullSeriesCollection(1).Trendlines.Add
+    'ActiveChart.FullSeriesCollection(1).Trendlines(1).Select
+    ActiveChart.FullSeriesCollection(2).Select
+    ActiveChart.FullSeriesCollection(2).Trendlines.Add
+    'ActiveChart.FullSeriesCollection(2).Trendlines(1).Select
+    ActiveChart.ChartTitle.Text = "N2 Inlet/Outlet Pressure (bar)"
+    'Selection.Delete
+    ''制氮机进气温度和排气温度绘图
+    ActiveSheet.Shapes.AddChart2(227, xlLine).Select
+    ActiveChart.SetSourceData Source:=Range("T1:T" & n & ",S1:S" & n)
+    ActiveChart.Axes(xlValue).Select
+    ActiveChart.Axes(xlValue).MinimumScale = 7                              ''纵坐标赋予最小值
+    ActiveChart.FullSeriesCollection(1).Select
+    ActiveChart.FullSeriesCollection(1).Trendlines.Add
+    'ActiveChart.FullSeriesCollection(1).Trendlines(1).Select
+    ActiveChart.FullSeriesCollection(2).Select
+    ActiveChart.FullSeriesCollection(2).Trendlines.Add
+    'ActiveChart.FullSeriesCollection(2).Trendlines(1).Select
+    'ActiveChart.ChartTitle.Select
+    ActiveChart.ChartTitle.Text = "N2 Inlet/Outlet Temperature (℃)"
+    'Selection.Delete
+    ''空压机排气空气FAD
+    ActiveSheet.Shapes.AddChart2(227, xlLine).Select
+    ActiveChart.SetSourceData Source:=Range("F1:F" & n)
+    ActiveChart.DisplayBlanksAs = xlInterpolated
+    ActiveChart.Axes(xlValue).Select
+    ActiveChart.Axes(xlValue).MinimumScale = 0                                      ''纵坐标赋予最小值
+    ActiveChart.FullSeriesCollection(1).Select
+    ActiveChart.FullSeriesCollection(1).Trendlines.Add
+    'ActiveChart.FullSeriesCollection(1).Trendlines(1).Select
+    ActiveChart.ChartTitle.Text = "Compressor Outlet FAD (Nl/s)"
+    'Selection.Delete
+    ''制氮机进气压缩空气FAD
+    ActiveSheet.Shapes.AddChart2(227, xlLine).Select
+    ActiveChart.SetSourceData Source:=Range("U1:U" & n)
+    ActiveChart.DisplayBlanksAs = xlInterpolated
+    ActiveChart.Axes(xlValue).Select
+    ActiveChart.Axes(xlValue).MinimumScale = 0                                      ''纵坐标赋予最小值
+    ActiveChart.FullSeriesCollection(1).Select
+    ActiveChart.FullSeriesCollection(1).Trendlines.Add
+    'ActiveChart.FullSeriesCollection(1).Trendlines(1).Select
+    ActiveChart.ChartTitle.Text = "N2 Inlet Feed Air (Nl/s)"
+    'Selection.Delete
+    ''制氮机排气氮气体积流量
+    ActiveSheet.Shapes.AddChart2(227, xlLine).Select
+    ActiveChart.SetSourceData Source:=Range("V1:V" & n)
+    ActiveChart.Axes(xlValue).Select
+    ActiveChart.Axes(xlValue).MinimumScale = 0                                      ''纵坐标赋予最小值
+    ActiveChart.FullSeriesCollection(1).Select
+    ActiveChart.FullSeriesCollection(1).Trendlines.Add
+    'ActiveChart.FullSeriesCollection(1).Trendlines(1).Select
+    ActiveChart.ChartTitle.Text = "N2 Outlet Flow (Nl/s)"
+    'Selection.Delete
+    ''制氮机储罐后氮气纯度
+    ActiveSheet.Shapes.AddChart2(227, xlLine).Select
+    ActiveChart.SetSourceData Source:=Range("O1:O" & n)
+    ActiveChart.Axes(xlValue).Select
+    ActiveChart.Axes(xlValue).MinimumScale = 94                                      ''纵坐标赋予最小值
+    ActiveChart.FullSeriesCollection(1).Select
+    ActiveChart.FullSeriesCollection(1).Trendlines.Add
+    'ActiveChart.FullSeriesCollection(1).Trendlines(1).Select
+    ActiveChart.ChartTitle.Text = "N2 Purity after buffer tank (%)"
+    'Selection.Delete
+
+    ActiveSheet.Shapes(1).Height = 280
+    ActiveSheet.Shapes(1).Width = 420
+    ActiveSheet.Shapes(1).Top = 0
+    ActiveSheet.Shapes(1).Left = 0
+    ActiveSheet.Shapes(2).Height = 280
+    ActiveSheet.Shapes(2).Width = 420
+    ActiveSheet.Shapes(2).Top = 0
+    ActiveSheet.Shapes(2).Left = 460
+    ActiveSheet.Shapes(3).Height = 280
+    ActiveSheet.Shapes(3).Width = 420
+    ActiveSheet.Shapes(3).Top = 0
+    ActiveSheet.Shapes(3).Left = 950
+    
+    ActiveSheet.Shapes(4).Height = 280
+    ActiveSheet.Shapes(4).Width = 420
+
+    ActiveSheet.Shapes(4).Top = 300
+    ActiveSheet.Shapes(4).Left = 0
+    ActiveSheet.Shapes(5).Height = 280
+    ActiveSheet.Shapes(5).Width = 420
+    ActiveSheet.Shapes(5).Top = 300
+    ActiveSheet.Shapes(5).Left = 460
+    ActiveSheet.Shapes(6).Height = 280
+    ActiveSheet.Shapes(6).Width = 420
+    ActiveSheet.Shapes(6).Top = 300
+    ActiveSheet.Shapes(6).Left = 950
+
+End Sub
+
+
+
+
