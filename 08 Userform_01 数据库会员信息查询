@@ -1,0 +1,95 @@
+Private Sub CommandButton1_Click()
+Dim rng As Range
+
+'用find方法做
+Set rng = Sheet1.Range("i1:i1000").Find(Me.TextBox1.Value)
+
+'''
+'Range.Find方法
+'语法: expression.Find (What, After, LookIn, LookAt, SearchOrder, SearchDirection, MatchCase, MatchByte, SearchFormat)
+'expression 一个表示Range对象的变量
+'What, 必须：要搜索的数据。可为字符串或任意Microsoft Excel数据类型
+'返回值：一个Range对象，它代表在其中找到该信息的第一个单元格
+
+If rng Is Nothing Then
+    MsgBox "无该用户"
+Else
+    Me.Label3.Caption = rng.Offset(0, -6)
+    Me.Label4.Caption = rng.Offset(0, -5)
+    Me.Label6.Caption = rng.Offset(0, -4)
+    Me.Label8.Caption = rng
+    Me.Label10.Caption = rng.Offset(0, -3)
+    Me.Label12.Caption = rng.Offset(0, -2)
+    Me.Label13.Caption = rng.Offset(0, -1)
+End If
+
+'''
+'Range.Offset属性
+'语法：expression.Offset(RowOffset, ColumnOffset)
+'expression 一个表示Range对象的变量
+'RowOffset,可选:区域偏移的行数（正值、负值或零），正值表示向下偏移，负值表示向上偏移。默认为0.
+'ColumnOffset,可选:区域偏移的行数（正值、负值或零），正值表示向下偏移，负值表示向上偏移。默认为0.
+
+'''
+'Userform的控件——Label
+'Label.Caption：使label控件显示一个想要值
+'Label.Enabled: True/False,是/否启动该控件
+'Label.Visible: True/False,是/否显示该控件
+
+End Sub
+
+'=========================================================
+Private Sub ListBox1_Click()
+Me.TextBox1 = Me.ListBox1.Value
+Me.ListBox1.Visible = False
+End Sub
+'=========================================================
+'''
+'Userform的控件——TextBox
+'TextBox 是常用于显示用户输入信息的控件，也可用于自输入其内容。 它也可以显示一组数据，如表、查询、工作表或计算结果等。
+'如果将 TextBox 绑定到数据源，则更改 TextBox 的内容也会更改绑定数据源的值。
+'应用于 TextBox 中的任何一处文本的格式都将影响控件中的所有文本。 例如，如果更改控件中任何字符的字体或大小，该更改将会影响控件中的所有字符。
+'TextBox 的默认属性是 Value 属性。 TextBox 的默认事件是 Change 事件。
+
+'Userform的控件——ListBox
+'ListBox的默认属性是Value属性，ListBox.Value通常输出的是明确选择的那个值
+'ListBox 的默认事件是 Click 事件，当用户为具有多个可能值的控件明确选择一个值时发生
+'ListBox 的方法
+'ListBox.AddItem: 对于单列 ListBox ， AddItem 方法向列表中添加项目。 对于多列 ListBox，此方法向列表中添加行。
+'ListBox.Clear: 删除 ListBox 中的列表中的所有条目。
+'ListBox.RemoveItem: 从 ListBox 中的列表中删除行。
+
+Private Sub TextBox1_Change()
+Dim arr()
+If Len(TextBox1.Value) >= 4 Then
+    Me.ListBox1.Clear
+    arr = Sheet1.Range("i2:i" & Sheet1.Range("a65536").End(xlUp).Row)
+    
+    For i = LBound(arr) To UBound(arr)
+        If InStr(arr(i, 1), Me.TextBox1.Value) > 0 Then
+            Me.ListBox1.AddItem arr(i, 1)
+        End If
+    Next
+	
+    If Me.ListBox1.ListCount > 0 Then
+		Me.ListBox1.Visible = True
+    End If
+Else
+    Me.ListBox1.Clear
+    Me.ListBox1.Visible = False
+
+'''
+'LBound(arrayname,[dimension])
+'arraname,必填。数组变量的名称；遵循标准变量命名约定。
+'dimension,可选。Variant (Long)。 指示返回哪个维度的下限的整数。 1 表示第一个维度，2 表示第二个维度，依此类推。 如果省略 dimension，则假定为 1。
+'返回值：返回一个 Long 型值，其中包含指示的数组维度的最小可用下标。
+'LBound 函数与 UBound 函数一起用来确定数组的大小。 使用 UBound 函数可查找数组维度的上限。
+
+'UBound(arrayname,[dimension])
+'返回值：返回一 个 long 数据类型，其中包含数组 的指定维度的最大可用 下标。
+
+End If
+End Sub
+
+
+
