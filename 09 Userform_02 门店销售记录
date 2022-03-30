@@ -1,0 +1,179 @@
+Dim arr()
+Dim ID As String
+Dim DJ As Long
+'先自定义公用的一些数据对象
+'''==============================================
+
+Private Sub UserForm_Activate()
+Dim dic
+arr = Sheet1.Range("a2:e" & Sheet1.Range("a65536").End(xlUp).Row)
+'将 产品信息原始数据库 定义为一个数组对象，便于提取
+
+Set dic = CreateObject("Scripting.Dictionary")
+
+For i = LBound(arr) To UBound(arr)
+    dic(arr(i, 2)) = 1
+Next
+'创建字典对象，用于产品信息的分类（清楚分类中的重复值）
+
+Me.ListBox1.List = dic.keys
+'经历上述 For 循环后，所有非重复的产品分类，构成了 字典
+'然后将 字典 的 Key 写入ListBox
+
+End Sub
+
+'''Dictionary 字典
+'Dictionary 对象 是 PERL 关联阵列的等效项。 可以是任何形式的数据的项目存储在阵列中。 
+'每个项目都与唯一的键关联。 键用于检索单个项目，通常为整数或字符串，但可以是除数组之外的任何内容。
+'以下代码演示如何创建 Dictionary 对象
+'Dim d                   'Create a variable
+'Set d = CreateObject("Scripting.Dictionary")
+'d.Add "a", "Athens"     'Add some keys and items
+'d.Add "b", "Belgrade"
+'d.Add "c", "Cairo"
+'方法：
+'方法		说明
+'Add		将新的键/项对添加到 Dictionary 对象。
+'Exists		返回一个 Boolean 值，该值指示 Dictionary 对象中 是否存在指定的键 。
+'Items		返回 Dictionary 对象中 所有项的 数组。
+'Keys		返回 Dictionary 对象中 所有键的 数组。
+'Remove		从 Dictionary 对象中删除一个指定的键/ 项 对。
+'RemoveAll	删除 Dictionary 对象中所有的键/项对。
+
+'''==============================================
+
+Private Sub ListBox1_Click()
+'列表1的点击会影响列表2的显示
+
+Dim dic
+Set dic = CreateObject("Scripting.Dictionary")
+Me.ListBox2.Clear
+Me.ListBox3.Clear
+Me.Label2.Caption = 0
+'由于列表框的从属关系，父项的选择会影响子项的读取，因此父项的操作时，应先清楚子项的显示
+
+For i = LBound(arr) To UBound(arr)
+    If arr(i, 2) = Me.ListBox1.Value Then
+        dic(arr(i, 3)) = 1
+    End If
+Next
+'根据前一父项的选择，输出其所有子项
+'经历上述 For 循环后，所有非重复的产品分类，构成了 字典
+'然后将 字典 的 Key 写入ListBox
+
+Me.ListBox2.List = dic.keys
+
+End Sub
+'''==============================================
+'与ListBox1的运行逻辑相似
+
+Private Sub ListBox2_Click()
+
+Dim dic
+
+Me.ListBox3.Clear
+Set dic = CreateObject("Scripting.Dictionary")
+
+For i = LBound(arr) To UBound(arr)
+    If arr(i, 2) = Me.ListBox1.Value And arr(i, 3) = Me.ListBox2.Value Then
+        dic(arr(i, 4)) = 1
+    End If
+Next
+
+Me.ListBox3.List = dic.keys
+Me.Label2.Caption = 0
+
+
+End Sub
+'''==============================================
+Private Sub ListBox3_Click()
+
+For i = LBound(arr) To UBound(arr)
+
+    If arr(i, 2) = Me.ListBox1.Value And arr(i, 3) = Me.ListBox2.Value And arr(i, 4) = Me.ListBox3.Value Then
+        ID = arr(i, 1)
+        DJ = arr(i, 5)
+    End If
+Next
+
+Me.Label2.Caption = DJ
+
+End Sub
+'''==============================================
+
+'将选取的商品依次加入到要结算的列表框中
+Private Sub CommandButton1_Click()
+
+If Me.ListBox1.Value <> "" And Me.ListBox2.Value <> "" And Me.ListBox3.Value <> "" And Me.TextBox1 > 0 Then
+	Me.ListBox4.AddItem				
+'对于单列 ListBox ， AddItem 方法向列表中添加项目。 对于多列 ListBox，此方法向列表中添加行。
+	Me.ListBox4.List(Me.ListBox4.ListCount - 1, 0) = ID
+	Me.ListBox4.List(Me.ListBox4.ListCount - 1, 1) = Me.ListBox1.Value
+	Me.ListBox4.List(Me.ListBox4.ListCount - 1, 2) = Me.ListBox2.Value
+	Me.ListBox4.List(Me.ListBox4.ListCount - 1, 3) = Me.ListBox3.Value
+	Me.ListBox4.List(Me.ListBox4.ListCount - 1, 4) = Me.TextBox1.Value
+	Me.ListBox4.List(Me.ListBox4.ListCount - 1, 5) = Me.TextBox1.Value * Me.Label2.Caption
+Else
+	MsgBox "请正确选择商品"
+End If
+
+'ListBox https://docs.microsoft.com/zh-cn/office/vba/api/outlook.listbox
+'ListBox.List(pvargIndex, pvargColumn)属性 https://docs.microsoft.com/zh-cn/office/vba/api/outlook.listbox.list
+'ListBox.List 可以生成一个多行多列的列表框显示结果
+'pvargIndex		可选	Variant	取值范围为从 0 到列表中条目数减 1 之间的整数。
+'pvargColumn	可选	Variant	取值范围为从 0 到列表中的列数减 1 之间的整数。
+'ListBox.ListCount 属性：返回一个Long，该值代表空间中列表数目的数量。此为只读属性。
+'ListCount 是您可以滚过的行数。 ListCount 总是比 ListIndex 属性的最大值大 1，因为索引号从 0 开始，而项目计数从 1 开始。
+'如果未选择任何项目，则 ListCount 为 0，并且 ListIndex 为 -1。
+
+Me.Label5.Caption = Me.Label5.Caption + Me.TextBox1.Value * Me.Label2.Caption
+
+End Sub
+'''==============================================
+
+'将结算列表框中的不需要的商品去除掉
+Private Sub CommandButton2_Click()
+
+For i = 0 To Me.ListBox4.ListCount - 1
+    If Me.ListBox4.Selected(i) = True Then
+        Me.Label5.Caption = Me.Label5.Caption - Me.ListBox4.List(i, 5)
+        Me.ListBox4.RemoveItem i
+    End If
+Next
+
+End Sub
+'ListBox.Selected 返回或设置一个 Boolean 类型的值，该值指示 ListBox 中项目的选择状态。 读/写。
+'ListBox.RemoveItem 从 ListBox 中的列表中删除行。
+
+'''==============================================
+'将结算的商品整理并输入到销售记录数据库中
+''' *引入库存概念，如何将结算的商品数量更新库存？待设计更新
+Private Sub CommandButton3_Click()
+Dim DDID As String
+Dim i
+If Me.ListBox4.ListCount > 0 Then
+
+	i = Sheet2.Range("a65536").End(xlUp).Row + 1
+	DDID = "D" & Format(VBA.Now, "yyyymmddhhmmss")
+'Format(String, Object)
+'将字符串中的一个或多个格式项替换为指定对象的字符串表示形式。
+
+'将结算框内物品写入到销售记录库中
+	For j = 0 To Me.ListBox4.ListCount - 1
+		Sheet2.Range("a" & i) = DDID
+		Sheet2.Range("b" & i) = Date
+		Sheet2.Range("c" & i) = Me.ListBox4.List(j, 0)
+		Sheet2.Range("d" & i) = Me.ListBox4.List(j, 4)
+		Sheet2.Range("e" & i) = Me.ListBox4.List(j, 5)
+		i = i + 1
+	Next
+
+	MsgBox "结算成功"
+	Unload Me
+
+Else
+	MsgBox "购物清单为空"
+End If
+
+End Sub
+
